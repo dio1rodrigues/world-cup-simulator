@@ -1,7 +1,6 @@
-```md
 # World Cup Simulator
 
-Aplicação web desenvolvida como solução para a avaliação técnica do processo seletivo de Estágio em Desenvolvimento de Software 2026.
+Aplicação web desenvolvida para simular uma Copa do Mundo.
 
 O projeto simula uma Copa do Mundo completa a partir da API fornecida no desafio, realizando o sorteio dos grupos, a simulação da fase de grupos, o chaveamento do mata-mata, a definição do campeão e o envio do resultado final para a API.
 
