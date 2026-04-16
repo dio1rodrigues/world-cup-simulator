@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { fetchAllTeams } from './api.js'
-import { drawGroups } from './engine.js'
+import { drawGroups, generateGroupStageScheduleList } from './engine.js'
 
 function useTournament() {
   const [teamList, setTeamList] = useState([])
   const [groupList, setGroupList] = useState([])
+  const [groupStageScheduleList, setGroupStageScheduleList] = useState([])
   const [isLoadingTeams, setIsLoadingTeams] = useState(false)
   const [statusMessage, setStatusMessage] = useState(
     'Nenhuma simulação foi iniciada ainda. Carregue as seleções para começar.',
@@ -41,34 +42,56 @@ function useTournament() {
     }
   }
 
-function sortGroups() {
-  if (teamList.length === 0) {
-    setStatusVariant('warning')
-    setStatusMessage('Carregue as seleções antes de realizar o sorteio dos grupos.')
-    return
+  function sortGroups() {
+    if (teamList.length === 0) {
+      setStatusVariant('warning')
+      setStatusMessage('Carregue as seleções antes de realizar o sorteio dos grupos.')
+      return
+    }
+
+    if (groupList.length > 0) {
+      setStatusVariant('info')
+      setStatusMessage('Os grupos já foram sorteados.')
+      return
+    }
+
+    const drawnGroupList = drawGroups(teamList)
+
+    setGroupList(drawnGroupList)
+    setStatusVariant('success')
+    setStatusMessage('Os grupos foram sorteados com sucesso.')
   }
 
-  if (groupList.length > 0) {
-    setStatusVariant('info')
-    setStatusMessage('Os grupos já foram sorteados.')
-    return
+  function generateGroupStageMatches() {
+    if (groupList.length === 0) {
+      setStatusVariant('warning')
+      setStatusMessage('Sorteie os grupos antes de gerar as partidas da fase de grupos.')
+      return
+    }
+
+    if (groupStageScheduleList.length > 0) {
+      setStatusVariant('info')
+      setStatusMessage('As partidas da fase de grupos já foram geradas.')
+      return
+    }
+
+    const generatedGroupStageScheduleList = generateGroupStageScheduleList(groupList)
+
+    setGroupStageScheduleList(generatedGroupStageScheduleList)
+    setStatusVariant('success')
+    setStatusMessage('As partidas da fase de grupos foram geradas com sucesso.')
   }
-
-  const drawnGroupList = drawGroups(teamList)
-
-  setGroupList(drawnGroupList)
-  setStatusVariant('success')
-  setStatusMessage('Os grupos foram sorteados com sucesso.')
-}
 
   return {
     teamList,
     groupList,
+    groupStageScheduleList,
     isLoadingTeams,
     statusMessage,
     statusVariant,
     loadTeams,
     sortGroups,
+    generateGroupStageMatches,
   }
 }
 

@@ -2,7 +2,7 @@ function GroupTable() {
   return (
     <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-slate-100">Classificação do grupo</h3>
+        <h3 className="text-lg font-semibold text-slate-100">Tabela de classificação</h3>
         <p className="mt-1 text-sm text-slate-400">
           A tabela será preenchida após a simulação da fase de grupos.
         </p>

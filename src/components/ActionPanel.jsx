@@ -10,9 +10,17 @@ function getLoadTeamsButtonLabel(isLoadingTeams, hasLoadedTeams) {
   return 'Carregar seleções'
 }
 
-function getActionPanelDescription(loadedTeamCount, hasDrawnGroups) {
+function getActionPanelDescription(
+  loadedTeamCount,
+  hasDrawnGroups,
+  hasGeneratedGroupStageMatches,
+) {
+  if (hasGeneratedGroupStageMatches) {
+    return 'As partidas da fase de grupos já estão prontas.'
+  }
+
   if (hasDrawnGroups) {
-    return 'Os grupos já foram sorteados e estão prontos para a próxima etapa.'
+    return 'Os grupos já foram sorteados. Agora você já pode gerar as partidas da fase de grupos.'
   }
 
   if (loadedTeamCount > 0) {
@@ -26,9 +34,11 @@ function ActionPanel(props) {
   const {
     onLoadTeams,
     onSortGroups,
+    onGenerateGroupStageMatches,
     isLoadingTeams,
     hasLoadedTeams,
     hasDrawnGroups,
+    hasGeneratedGroupStageMatches,
     loadedTeamCount,
   } = props
 
@@ -40,6 +50,7 @@ function ActionPanel(props) {
   const actionPanelDescription = getActionPanelDescription(
     loadedTeamCount,
     hasDrawnGroups,
+    hasGeneratedGroupStageMatches,
   )
 
   return (
@@ -70,10 +81,11 @@ function ActionPanel(props) {
 
         <button
           type="button"
-          disabled
-          className="rounded-xl bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition disabled:cursor-not-allowed disabled:opacity-60"
+          onClick={onGenerateGroupStageMatches}
+          disabled={!hasDrawnGroups || hasGeneratedGroupStageMatches}
+          className="rounded-xl bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Simular fase de grupos
+          Gerar partidas da fase de grupos
         </button>
 
         <button
