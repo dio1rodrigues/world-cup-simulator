@@ -5,8 +5,20 @@ import GroupTable from './components/GroupTable.jsx'
 import KnockoutBracket from './components/KnockoutBracket.jsx'
 import MatchList from './components/MatchList.jsx'
 import StatusBanner from './components/StatusBanner.jsx'
+import useTournament from './features/tournament/useTournament.js'
 
 function App() {
+  const {
+    teamList,
+    isLoadingTeams,
+    statusMessage,
+    statusVariant,
+    loadTeams,
+  } = useTournament()
+
+  const hasLoadedTeams = teamList.length > 0
+  const loadedTeamCount = teamList.length
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
@@ -19,74 +31,83 @@ function App() {
           </p>
         </section>
 
-        <ActionPanel />
-        <StatusBanner />
+        <ActionPanel
+          onLoadTeams={loadTeams}
+          isLoadingTeams={isLoadingTeams}
+          hasLoadedTeams={hasLoadedTeams}
+          loadedTeamCount={loadedTeamCount}
+        />
 
-<section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-  <GroupCard
-    groupName="Grupo A"
-    teamOneName="Seleção 01"
-    teamTwoName="Seleção 02"
-    teamThreeName="Seleção 03"
-    teamFourName="Seleção 04"
-  />
+        <StatusBanner
+          statusMessage={statusMessage}
+          statusVariant={statusVariant}
+        />
 
-  <GroupCard
-    groupName="Grupo B"
-    teamOneName="Seleção 05"
-    teamTwoName="Seleção 06"
-    teamThreeName="Seleção 07"
-    teamFourName="Seleção 08"
-  />
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <GroupCard
+            groupName="Grupo A"
+            teamOneName="Seleção 01"
+            teamTwoName="Seleção 02"
+            teamThreeName="Seleção 03"
+            teamFourName="Seleção 04"
+          />
 
-  <GroupCard
-    groupName="Grupo C"
-    teamOneName="Seleção 09"
-    teamTwoName="Seleção 10"
-    teamThreeName="Seleção 11"
-    teamFourName="Seleção 12"
-  />
+          <GroupCard
+            groupName="Grupo B"
+            teamOneName="Seleção 05"
+            teamTwoName="Seleção 06"
+            teamThreeName="Seleção 07"
+            teamFourName="Seleção 08"
+          />
 
-  <GroupCard
-    groupName="Grupo D"
-    teamOneName="Seleção 13"
-    teamTwoName="Seleção 14"
-    teamThreeName="Seleção 15"
-    teamFourName="Seleção 16"
-  />
+          <GroupCard
+            groupName="Grupo C"
+            teamOneName="Seleção 09"
+            teamTwoName="Seleção 10"
+            teamThreeName="Seleção 11"
+            teamFourName="Seleção 12"
+          />
 
-  <GroupCard
-    groupName="Grupo E"
-    teamOneName="Seleção 17"
-    teamTwoName="Seleção 18"
-    teamThreeName="Seleção 19"
-    teamFourName="Seleção 20"
-  />
+          <GroupCard
+            groupName="Grupo D"
+            teamOneName="Seleção 13"
+            teamTwoName="Seleção 14"
+            teamThreeName="Seleção 15"
+            teamFourName="Seleção 16"
+          />
 
-  <GroupCard
-    groupName="Grupo F"
-    teamOneName="Seleção 21"
-    teamTwoName="Seleção 22"
-    teamThreeName="Seleção 23"
-    teamFourName="Seleção 24"
-  />
+          <GroupCard
+            groupName="Grupo E"
+            teamOneName="Seleção 17"
+            teamTwoName="Seleção 18"
+            teamThreeName="Seleção 19"
+            teamFourName="Seleção 20"
+          />
 
-  <GroupCard
-    groupName="Grupo G"
-    teamOneName="Seleção 25"
-    teamTwoName="Seleção 26"
-    teamThreeName="Seleção 27"
-    teamFourName="Seleção 28"
-  />
+          <GroupCard
+            groupName="Grupo F"
+            teamOneName="Seleção 21"
+            teamTwoName="Seleção 22"
+            teamThreeName="Seleção 23"
+            teamFourName="Seleção 24"
+          />
 
-  <GroupCard
-    groupName="Grupo H"
-    teamOneName="Seleção 29"
-    teamTwoName="Seleção 30"
-    teamThreeName="Seleção 31"
-    teamFourName="Seleção 32"
-  />
-</section>
+          <GroupCard
+            groupName="Grupo G"
+            teamOneName="Seleção 25"
+            teamTwoName="Seleção 26"
+            teamThreeName="Seleção 27"
+            teamFourName="Seleção 28"
+          />
+
+          <GroupCard
+            groupName="Grupo H"
+            teamOneName="Seleção 29"
+            teamTwoName="Seleção 30"
+            teamThreeName="Seleção 31"
+            teamFourName="Seleção 32"
+          />
+        </section>
 
         <section className="grid gap-6 xl:grid-cols-[1.3fr_0.9fr]">
           <MatchList />
