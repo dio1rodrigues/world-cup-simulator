@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { fetchAllTeams } from './api.js'
+import { drawGroups } from './engine.js'
 
 function useTournament() {
   const [teamList, setTeamList] = useState([])
+  const [groupList, setGroupList] = useState([])
   const [isLoadingTeams, setIsLoadingTeams] = useState(false)
   const [statusMessage, setStatusMessage] = useState(
     'Nenhuma simulação foi iniciada ainda. Carregue as seleções para começar.',
@@ -16,9 +18,7 @@ function useTournament() {
 
     if (teamList.length > 0) {
       setStatusVariant('info')
-      setStatusMessage(
-        'As seleções já foram carregadas.',
-      )
+      setStatusMessage('As seleções já foram carregadas.')
       return
     }
 
@@ -31,26 +31,44 @@ function useTournament() {
 
       setTeamList(loadedTeamList)
       setStatusVariant('success')
-      setStatusMessage(
-        `${loadedTeamList.length} seleções carregadas com sucesso.`,
-      )
+      setStatusMessage(`${loadedTeamList.length} seleções carregadas com sucesso.`)
     } catch (error) {
       console.error(error)
       setStatusVariant('error')
-      setStatusMessage(
-        'Não foi possível carregar as seleções. Tente novamente.',
-      )
+      setStatusMessage('Não foi possível carregar as seleções. Tente novamente.')
     } finally {
       setIsLoadingTeams(false)
     }
   }
 
+function sortGroups() {
+  if (teamList.length === 0) {
+    setStatusVariant('warning')
+    setStatusMessage('Carregue as seleções antes de realizar o sorteio dos grupos.')
+    return
+  }
+
+  if (groupList.length > 0) {
+    setStatusVariant('info')
+    setStatusMessage('Os grupos já foram sorteados.')
+    return
+  }
+
+  const drawnGroupList = drawGroups(teamList)
+
+  setGroupList(drawnGroupList)
+  setStatusVariant('success')
+  setStatusMessage('Os grupos foram sorteados com sucesso.')
+}
+
   return {
     teamList,
+    groupList,
     isLoadingTeams,
     statusMessage,
     statusVariant,
     loadTeams,
+    sortGroups,
   }
 }
 

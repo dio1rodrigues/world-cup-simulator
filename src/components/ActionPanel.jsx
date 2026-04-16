@@ -10,7 +10,11 @@ function getLoadTeamsButtonLabel(isLoadingTeams, hasLoadedTeams) {
   return 'Carregar seleções'
 }
 
-function getActionPanelDescription(loadedTeamCount) {
+function getActionPanelDescription(loadedTeamCount, hasDrawnGroups) {
+  if (hasDrawnGroups) {
+    return 'Os grupos já foram sorteados e estão prontos para a próxima etapa.'
+  }
+
   if (loadedTeamCount > 0) {
     return `${loadedTeamCount} seleções carregadas e prontas para o sorteio.`
   }
@@ -21,8 +25,10 @@ function getActionPanelDescription(loadedTeamCount) {
 function ActionPanel(props) {
   const {
     onLoadTeams,
+    onSortGroups,
     isLoadingTeams,
     hasLoadedTeams,
+    hasDrawnGroups,
     loadedTeamCount,
   } = props
 
@@ -31,7 +37,10 @@ function ActionPanel(props) {
     hasLoadedTeams,
   )
 
-  const actionPanelDescription = getActionPanelDescription(loadedTeamCount)
+  const actionPanelDescription = getActionPanelDescription(
+    loadedTeamCount,
+    hasDrawnGroups,
+  )
 
   return (
     <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-lg shadow-slate-950/20">
@@ -52,8 +61,9 @@ function ActionPanel(props) {
 
         <button
           type="button"
-          disabled
-          className="rounded-xl bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition disabled:cursor-not-allowed disabled:opacity-60"
+          onClick={onSortGroups}
+          disabled={!hasLoadedTeams || hasDrawnGroups}
+          className="rounded-xl bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           Sortear grupos
         </button>
