@@ -1,11 +1,17 @@
 import { useState } from 'react'
 import { fetchAllTeams } from './api.js'
-import { drawGroups, generateGroupStageScheduleList } from './engine.js'
+import {
+  drawGroups,
+  generateGroupStageScheduleList,
+  simulateGroupStageScheduleList,
+  calculateGroupStandingsList,
+} from './engine.js'
 
 function useTournament() {
   const [teamList, setTeamList] = useState([])
   const [groupList, setGroupList] = useState([])
   const [groupStageScheduleList, setGroupStageScheduleList] = useState([])
+  const [groupStandingsList, setGroupStandingsList] = useState([])
   const [isLoadingTeams, setIsLoadingTeams] = useState(false)
   const [statusMessage, setStatusMessage] = useState(
     'Nenhuma simulação foi iniciada ainda. Carregue as seleções para começar.',
@@ -79,19 +85,46 @@ function useTournament() {
 
     setGroupStageScheduleList(generatedGroupStageScheduleList)
     setStatusVariant('success')
-    setStatusMessage('As partidas da fase de grupos foram geradas com sucesso.')
+    setStatusMessage('As partidas da fase de grupos já estão prontas.')
+  }
+
+  function simulateGroupStage() {
+    if (groupStageScheduleList.length === 0) {
+      setStatusVariant('warning')
+      setStatusMessage('Gere as partidas da fase de grupos antes de simular os resultados.')
+      return
+    }
+
+    if (groupStandingsList.length > 0) {
+      setStatusVariant('info')
+      setStatusMessage('A fase de grupos já foi simulada.')
+      return
+    }
+
+    const simulatedGroupStageScheduleList =
+      simulateGroupStageScheduleList(groupStageScheduleList)
+
+    const calculatedGroupStandingsList =
+      calculateGroupStandingsList(simulatedGroupStageScheduleList)
+
+    setGroupStageScheduleList(simulatedGroupStageScheduleList)
+    setGroupStandingsList(calculatedGroupStandingsList)
+    setStatusVariant('success')
+    setStatusMessage('A fase de grupos foi simulada com sucesso.')
   }
 
   return {
     teamList,
     groupList,
     groupStageScheduleList,
+    groupStandingsList,
     isLoadingTeams,
     statusMessage,
     statusVariant,
     loadTeams,
     sortGroups,
     generateGroupStageMatches,
+    simulateGroupStage,
   }
 }
 

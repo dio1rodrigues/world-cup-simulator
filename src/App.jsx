@@ -50,17 +50,20 @@ function App() {
     teamList,
     groupList,
     groupStageScheduleList,
+    groupStandingsList,
     isLoadingTeams,
     statusMessage,
     statusVariant,
     loadTeams,
     sortGroups,
     generateGroupStageMatches,
+    simulateGroupStage,
   } = useTournament()
 
   const hasLoadedTeams = teamList.length > 0
   const hasDrawnGroups = groupList.length > 0
   const hasGeneratedGroupStageMatches = groupStageScheduleList.length > 0
+  const hasSimulatedGroupStage = groupStandingsList.length > 0
   const loadedTeamCount = teamList.length
   const renderGroupCard = createGroupCardRenderer(groupList)
 
@@ -80,10 +83,12 @@ function App() {
           onLoadTeams={loadTeams}
           onSortGroups={sortGroups}
           onGenerateGroupStageMatches={generateGroupStageMatches}
+          onSimulateGroupStage={simulateGroupStage}
           isLoadingTeams={isLoadingTeams}
           hasLoadedTeams={hasLoadedTeams}
           hasDrawnGroups={hasDrawnGroups}
           hasGeneratedGroupStageMatches={hasGeneratedGroupStageMatches}
+          hasSimulatedGroupStage={hasSimulatedGroupStage}
           loadedTeamCount={loadedTeamCount}
         />
 
@@ -97,7 +102,7 @@ function App() {
         </section>
 
         <MatchList groupStageScheduleList={groupStageScheduleList} />
-        <GroupTable />
+        <GroupTable groupStandingsList={groupStandingsList} />
 
         <KnockoutBracket />
         <ChampionCard />

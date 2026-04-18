@@ -14,9 +14,14 @@ function getActionPanelDescription(
   loadedTeamCount,
   hasDrawnGroups,
   hasGeneratedGroupStageMatches,
+  hasSimulatedGroupStage,
 ) {
+  if (hasSimulatedGroupStage) {
+    return 'A fase de grupos já foi simulada e a classificação está pronta.'
+  }
+
   if (hasGeneratedGroupStageMatches) {
-    return 'As partidas da fase de grupos já estão prontas.'
+    return 'As partidas da fase de grupos já estão prontas. Agora você já pode simular a fase de grupos.'
   }
 
   if (hasDrawnGroups) {
@@ -35,10 +40,12 @@ function ActionPanel(props) {
     onLoadTeams,
     onSortGroups,
     onGenerateGroupStageMatches,
+    onSimulateGroupStage,
     isLoadingTeams,
     hasLoadedTeams,
     hasDrawnGroups,
     hasGeneratedGroupStageMatches,
+    hasSimulatedGroupStage,
     loadedTeamCount,
   } = props
 
@@ -51,6 +58,7 @@ function ActionPanel(props) {
     loadedTeamCount,
     hasDrawnGroups,
     hasGeneratedGroupStageMatches,
+    hasSimulatedGroupStage,
   )
 
   return (
@@ -90,10 +98,11 @@ function ActionPanel(props) {
 
         <button
           type="button"
-          disabled
-          className="rounded-xl bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition disabled:cursor-not-allowed disabled:opacity-60"
+          onClick={onSimulateGroupStage}
+          disabled={!hasGeneratedGroupStageMatches || hasSimulatedGroupStage}
+          className="rounded-xl bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Gerar mata-mata
+          Simular fase de grupos
         </button>
 
         <button
@@ -101,7 +110,7 @@ function ActionPanel(props) {
           disabled
           className="rounded-xl bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Simular fases finais
+          Gerar mata-mata
         </button>
 
         <button

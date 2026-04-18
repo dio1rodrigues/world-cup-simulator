@@ -8,7 +8,11 @@ function getMatchScoreLabel(homeGoals, awayGoals) {
 
 function getGroupSummaryText(groupStageScheduleItem) {
   const roundCount = groupStageScheduleItem.roundList.length
-  const totalMatchCount = roundCount * 2
+  let totalMatchCount = 0
+
+  for (const roundItem of groupStageScheduleItem.roundList) {
+    totalMatchCount += roundItem.matchList.length
+  }
 
   return `${roundCount} rodadas • ${totalMatchCount} partidas`
 }
@@ -24,14 +28,14 @@ function renderGroupStageMatchItem(matchItem) {
       key={`${matchItem.groupName}-${matchItem.roundNumber}-${matchItem.homeTeam.token}-${matchItem.awayTeam.token}`}
       className="rounded-xl bg-slate-800/70 px-4 py-3"
     >
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-sm text-slate-200">
-        <span className="truncate text-left">{matchItem.homeTeam.nome}</span>
+      <div className="grid grid-cols-[minmax(0,1fr)_88px_minmax(0,1fr)] items-center gap-3 text-sm text-slate-200">
+        <span className="truncate pr-2 text-left">{matchItem.homeTeam.nome}</span>
 
-        <span className="rounded-lg bg-slate-950 px-3 py-1 text-xs font-semibold sm:text-sm">
+        <span className="rounded-lg bg-slate-950 px-3 py-1 text-center text-xs font-semibold sm:text-sm">
           {matchScoreLabel}
         </span>
 
-        <span className="truncate text-right">{matchItem.awayTeam.nome}</span>
+        <span className="truncate pl-2 text-right">{matchItem.awayTeam.nome}</span>
       </div>
     </div>
   )
