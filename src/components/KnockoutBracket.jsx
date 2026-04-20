@@ -47,10 +47,12 @@ function renderKnockoutMatchItem(matchItem) {
       key={matchItem.matchLabel}
       className="rounded-xl border border-slate-800 bg-slate-950/40 p-4"
     >
-      <div className="mb-3">
+      <div className="mb-3 flex items-center justify-between gap-3">
         <h5 className="text-sm font-semibold text-slate-100">
           {matchItem.matchLabel}
         </h5>
+
+        <span className="text-xs text-slate-500">Eliminatória</span>
       </div>
 
       <div className="space-y-2">
@@ -69,10 +71,12 @@ function renderEmptyStage(stageItem) {
       key={stageItem.stageName}
       className="rounded-2xl border border-slate-800/80 bg-slate-950/30 p-4"
     >
-      <div className="mb-4">
+      <div className="mb-4 flex items-center justify-between gap-3">
         <h4 className="text-base font-semibold text-slate-100">
           {stageItem.stageName}
         </h4>
+
+        <span className="text-xs text-slate-500">0 jogos</span>
       </div>
 
       <div className="rounded-xl border border-dashed border-slate-800 bg-slate-950/20 p-4 text-sm text-slate-500">
@@ -88,10 +92,14 @@ function renderFilledStage(stageItem) {
       key={stageItem.stageName}
       className="rounded-2xl border border-slate-800/80 bg-slate-950/30 p-4"
     >
-      <div className="mb-4">
+      <div className="mb-4 flex items-center justify-between gap-3">
         <h4 className="text-base font-semibold text-slate-100">
           {stageItem.stageName}
         </h4>
+
+        <span className="text-xs text-slate-500">
+          {stageItem.matchList.length} jogos
+        </span>
       </div>
 
       <div className="space-y-4">
@@ -128,17 +136,25 @@ function KnockoutBracket(props) {
 
   return (
     <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-slate-100">Mata-mata</h3>
-        <p className="mt-1 text-sm text-slate-400">
-          {hasKnockoutStage
-            ? 'O chaveamento foi definido a partir dos classificados da fase de grupos.'
-            : 'O chaveamento será exibido após a definição dos classificados.'}
-        </p>
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-slate-100">Mata-mata</h3>
+          <p className="mt-1 text-sm text-slate-400">
+            {hasKnockoutStage
+              ? 'O chaveamento foi definido a partir dos classificados da fase de grupos.'
+              : 'O chaveamento será exibido após a definição dos classificados.'}
+          </p>
+        </div>
+
+        <span className="inline-flex w-fit rounded-full border border-slate-800 bg-slate-900/80 px-3 py-1 text-xs font-medium text-slate-300">
+          Oitavas até a final
+        </span>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-4">
-        {visibleStageList.map(renderKnockoutStageItem)}
+      <div className="overflow-x-auto pb-2">
+        <div className="grid min-w-[980px] gap-4 xl:min-w-0 xl:grid-cols-4">
+          {visibleStageList.map(renderKnockoutStageItem)}
+        </div>
       </div>
     </section>
   )

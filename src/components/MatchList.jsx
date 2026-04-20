@@ -26,12 +26,12 @@ function renderGroupStageMatchItem(matchItem) {
   return (
     <div
       key={`${matchItem.groupName}-${matchItem.roundNumber}-${matchItem.homeTeam.token}-${matchItem.awayTeam.token}`}
-      className="rounded-xl bg-slate-800/70 px-4 py-3"
+      className="rounded-xl border border-slate-800 bg-slate-800/70 px-4 py-3"
     >
-      <div className="grid grid-cols-[minmax(0,1fr)_88px_minmax(0,1fr)] items-center gap-3 text-sm text-slate-200">
+      <div className="grid grid-cols-[minmax(0,1fr)_96px_minmax(0,1fr)] items-center gap-3 text-sm text-slate-200">
         <span className="truncate pr-2 text-left">{matchItem.homeTeam.nome}</span>
 
-        <span className="rounded-lg bg-slate-950 px-3 py-1 text-center text-xs font-semibold sm:text-sm">
+        <span className="rounded-lg border border-slate-800 bg-slate-950 px-3 py-1 text-center text-xs font-semibold sm:text-sm">
           {matchScoreLabel}
         </span>
 
@@ -47,11 +47,12 @@ function renderGroupStageRoundItem(roundItem) {
       key={`${roundItem.groupName}-rodada-${roundItem.roundNumber}`}
       className="space-y-3"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h5 className="text-sm font-semibold text-slate-200">
           Rodada {roundItem.roundNumber}
         </h5>
-        <span className="text-xs text-slate-500">
+
+        <span className="inline-flex rounded-full border border-slate-800 bg-slate-900/80 px-3 py-1 text-xs font-medium text-slate-400">
           {roundItem.matchList.length} partidas
         </span>
       </div>
@@ -79,7 +80,7 @@ function renderGroupStageScheduleItem(groupStageScheduleItem) {
           <p className="mt-1 text-xs text-slate-400">{groupSummaryText}</p>
         </div>
 
-        <span className="text-xs font-medium text-slate-400 transition group-open:rotate-180">
+        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-800 bg-slate-900/80 text-xs font-medium text-slate-400 transition group-open:rotate-180">
           ▼
         </span>
       </summary>
@@ -108,7 +109,7 @@ function MatchList(props) {
           </p>
         </div>
 
-        <div className="rounded-xl bg-slate-800/40 p-4 text-sm text-slate-400">
+        <div className="rounded-xl border border-dashed border-slate-800 bg-slate-800/20 p-4 text-sm text-slate-400">
           As partidas ainda não foram geradas.
         </div>
       </section>
@@ -117,13 +118,19 @@ function MatchList(props) {
 
   return (
     <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-slate-100">
-          Partidas da fase de grupos
-        </h3>
-        <p className="mt-1 text-sm text-slate-400">
-          Abra cada grupo para visualizar as rodadas e os confrontos.
-        </p>
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-slate-100">
+            Partidas da fase de grupos
+          </h3>
+          <p className="mt-1 text-sm text-slate-400">
+            Abra cada grupo para visualizar as rodadas e os confrontos.
+          </p>
+        </div>
+
+        <span className="inline-flex w-fit rounded-full border border-slate-800 bg-slate-900/80 px-3 py-1 text-xs font-medium text-slate-300">
+          8 grupos monitorados
+        </span>
       </div>
 
       <div className="space-y-4">

@@ -48,3 +48,16 @@ textarea {
 button {
   cursor: pointer;
 }
+
+summary {
+  list-style: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+::selection {
+  background: rgba(59, 130, 246, 0.28);
+  color: #f8fafc;
+}
