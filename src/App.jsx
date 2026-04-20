@@ -1,120 +1,129 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import ActionPanel from './components/ActionPanel.jsx'
+import ChampionCard from './components/ChampionCard.jsx'
+import GroupCard from './components/GroupCard.jsx'
+import GroupTable from './components/GroupTable.jsx'
+import KnockoutBracket from './components/KnockoutBracket.jsx'
+import MatchList from './components/MatchList.jsx'
+import StatusBanner from './components/StatusBanner.jsx'
+import useTournament from './features/tournament/useTournament.js'
+
+const groupNameList = [
+  'Grupo A',
+  'Grupo B',
+  'Grupo C',
+  'Grupo D',
+  'Grupo E',
+  'Grupo F',
+  'Grupo G',
+  'Grupo H',
+]
+
+function findGroupByName(groupList, groupName) {
+  for (const groupItem of groupList) {
+    if (groupItem.groupName === groupName) {
+      return groupItem
+    }
+  }
+
+  return null
+}
+
+function createGroupCardRenderer(groupList) {
+  function renderGroupCard(groupName) {
+    const currentGroup = findGroupByName(groupList, groupName)
+    const currentTeamList = currentGroup ? currentGroup.teamList : []
+
+    return (
+      <GroupCard
+        key={groupName}
+        groupName={groupName}
+        teamList={currentTeamList}
+      />
+    )
+  }
+
+  return renderGroupCard
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  const {
+    teamList,
+    groupList,
+    groupStageScheduleList,
+    groupStandingsList,
+    knockoutStageList,
+    championTeam,
+    isLoadingTeams,
+    isSendingFinalResult,
+    hasSentFinalResult,
+    statusMessage,
+    statusVariant,
+    loadTeams,
+    sortGroups,
+    generateGroupStageMatches,
+    simulateGroupStage,
+    generateKnockoutStage,
+    simulateKnockoutStage,
+    sendFinalResult,
+  } = useTournament()
+
+  const hasLoadedTeams = teamList.length > 0
+  const hasDrawnGroups = groupList.length > 0
+  const hasGeneratedGroupStageMatches = groupStageScheduleList.length > 0
+  const hasSimulatedGroupStage = groupStandingsList.length > 0
+  const hasGeneratedKnockoutStage = knockoutStageList.length > 0
+  const hasSimulatedKnockoutStage = championTeam !== null
+  const loadedTeamCount = teamList.length
+  const renderGroupCard = createGroupCardRenderer(groupList)
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
+    <div className="min-h-screen bg-slate-950 text-slate-100">
+      <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+        <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-8 shadow-xl shadow-slate-950/20">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-50 sm:text-4xl">
+            Simulador de Copa do Mundo
+          </h1>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400 sm:text-base">
+            Acompanhe grupos, partidas, classificação, mata-mata e campeão em
+            uma única interface.
           </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+        </section>
 
-      <div className="ticks"></div>
+        <ActionPanel
+          onLoadTeams={loadTeams}
+          onSortGroups={sortGroups}
+          onGenerateGroupStageMatches={generateGroupStageMatches}
+          onSimulateGroupStage={simulateGroupStage}
+          onGenerateKnockoutStage={generateKnockoutStage}
+          onSimulateKnockoutStage={simulateKnockoutStage}
+          onSendFinalResult={sendFinalResult}
+          isLoadingTeams={isLoadingTeams}
+          isSendingFinalResult={isSendingFinalResult}
+          hasLoadedTeams={hasLoadedTeams}
+          hasDrawnGroups={hasDrawnGroups}
+          hasGeneratedGroupStageMatches={hasGeneratedGroupStageMatches}
+          hasSimulatedGroupStage={hasSimulatedGroupStage}
+          hasGeneratedKnockoutStage={hasGeneratedKnockoutStage}
+          hasSimulatedKnockoutStage={hasSimulatedKnockoutStage}
+          hasSentFinalResult={hasSentFinalResult}
+          loadedTeamCount={loadedTeamCount}
+        />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        <StatusBanner
+          statusMessage={statusMessage}
+          statusVariant={statusVariant}
+        />
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {groupNameList.map(renderGroupCard)}
+        </section>
+
+        <MatchList groupStageScheduleList={groupStageScheduleList} />
+        <GroupTable groupStandingsList={groupStandingsList} />
+        <KnockoutBracket knockoutStageList={knockoutStageList} />
+        <ChampionCard championTeam={championTeam} />
+      </main>
+    </div>
   )
 }
 
