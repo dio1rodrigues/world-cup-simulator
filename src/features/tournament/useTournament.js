@@ -1,18 +1,56 @@
 import { useState } from 'react'
-import { fetchAllTeams } from './api.js'
+import { fetchAllTeams, sendFinalResult as postFinalResult } from './api.js'
 import {
   drawGroups,
   generateGroupStageScheduleList,
   simulateGroupStageScheduleList,
   calculateGroupStandingsList,
+  generateKnockoutStageList,
+  simulateKnockoutStageList,
+  findChampionTeam,
 } from './engine.js'
+
+function findFinalStage(knockoutStageList) {
+  for (const stageItem of knockoutStageList) {
+    if (stageItem.stageName === 'Final') {
+      return stageItem
+    }
+  }
+
+  return null
+}
+
+function findFinalMatch(knockoutStageList) {
+  const finalStage = findFinalStage(knockoutStageList)
+
+  if (!finalStage || finalStage.matchList.length === 0) {
+    return null
+  }
+
+  return finalStage.matchList[0]
+}
+
+function buildFinalResultPayload(finalMatch) {
+  return {
+    equipeA: finalMatch.homeTeam.token,
+    equipeB: finalMatch.awayTeam.token,
+    golsEquipeA: finalMatch.homeGoals,
+    golsEquipeB: finalMatch.awayGoals,
+    golsPenaltyTimeA: finalMatch.homePenaltyGoals ?? 0,
+    golsPenaltyTimeB: finalMatch.awayPenaltyGoals ?? 0,
+  }
+}
 
 function useTournament() {
   const [teamList, setTeamList] = useState([])
   const [groupList, setGroupList] = useState([])
   const [groupStageScheduleList, setGroupStageScheduleList] = useState([])
   const [groupStandingsList, setGroupStandingsList] = useState([])
+  const [knockoutStageList, setKnockoutStageList] = useState([])
+  const [championTeam, setChampionTeam] = useState(null)
   const [isLoadingTeams, setIsLoadingTeams] = useState(false)
+  const [isSendingFinalResult, setIsSendingFinalResult] = useState(false)
+  const [hasSentFinalResult, setHasSentFinalResult] = useState(false)
   const [statusMessage, setStatusMessage] = useState(
     'Nenhuma simulação foi iniciada ainda. Carregue as seleções para começar.',
   )
@@ -38,7 +76,9 @@ function useTournament() {
 
       setTeamList(loadedTeamList)
       setStatusVariant('success')
-      setStatusMessage(`${loadedTeamList.length} seleções carregadas com sucesso.`)
+      setStatusMessage(
+        `${loadedTeamList.length} seleções carregadas com sucesso.`,
+      )
     } catch (error) {
       console.error(error)
       setStatusVariant('error')
@@ -51,7 +91,9 @@ function useTournament() {
   function sortGroups() {
     if (teamList.length === 0) {
       setStatusVariant('warning')
-      setStatusMessage('Carregue as seleções antes de realizar o sorteio dos grupos.')
+      setStatusMessage(
+        'Carregue as seleções antes de realizar o sorteio dos grupos.',
+      )
       return
     }
 
@@ -71,7 +113,9 @@ function useTournament() {
   function generateGroupStageMatches() {
     if (groupList.length === 0) {
       setStatusVariant('warning')
-      setStatusMessage('Sorteie os grupos antes de gerar as partidas da fase de grupos.')
+      setStatusMessage(
+        'Sorteie os grupos antes de gerar as partidas da fase de grupos.',
+      )
       return
     }
 
@@ -81,7 +125,8 @@ function useTournament() {
       return
     }
 
-    const generatedGroupStageScheduleList = generateGroupStageScheduleList(groupList)
+    const generatedGroupStageScheduleList =
+      generateGroupStageScheduleList(groupList)
 
     setGroupStageScheduleList(generatedGroupStageScheduleList)
     setStatusVariant('success')
@@ -91,7 +136,9 @@ function useTournament() {
   function simulateGroupStage() {
     if (groupStageScheduleList.length === 0) {
       setStatusVariant('warning')
-      setStatusMessage('Gere as partidas da fase de grupos antes de simular os resultados.')
+      setStatusMessage(
+        'Gere as partidas da fase de grupos antes de simular os resultados.',
+      )
       return
     }
 
@@ -113,18 +160,118 @@ function useTournament() {
     setStatusMessage('A fase de grupos foi simulada com sucesso.')
   }
 
+  function generateKnockoutStage() {
+    if (groupStandingsList.length === 0) {
+      setStatusVariant('warning')
+      setStatusMessage('Simule a fase de grupos antes de gerar o mata-mata.')
+      return
+    }
+
+    if (knockoutStageList.length > 0) {
+      setStatusVariant('info')
+      setStatusMessage('O mata-mata já foi gerado.')
+      return
+    }
+
+    const generatedKnockoutStageList =
+      generateKnockoutStageList(groupStandingsList)
+
+    setKnockoutStageList(generatedKnockoutStageList)
+    setStatusVariant('success')
+    setStatusMessage('As oitavas de final foram definidas com sucesso.')
+  }
+
+  function simulateKnockoutStage() {
+    if (knockoutStageList.length === 0) {
+      setStatusVariant('warning')
+      setStatusMessage('Gere o mata-mata antes de simular as fases finais.')
+      return
+    }
+
+    if (championTeam !== null) {
+      setStatusVariant('info')
+      setStatusMessage('As fases finais já foram simuladas.')
+      return
+    }
+
+    const simulatedKnockoutStageList =
+      simulateKnockoutStageList(knockoutStageList)
+
+    const definedChampionTeam = findChampionTeam(simulatedKnockoutStageList)
+
+    setKnockoutStageList(simulatedKnockoutStageList)
+    setChampionTeam(definedChampionTeam)
+    setStatusVariant('success')
+    setStatusMessage('As fases finais foram simuladas com sucesso.')
+  }
+
+  async function sendFinalResult() {
+    if (championTeam === null) {
+      setStatusVariant('warning')
+      setStatusMessage(
+        'Simule as fases finais antes de enviar o resultado final.',
+      )
+      return
+    }
+
+    if (hasSentFinalResult) {
+      setStatusVariant('info')
+      setStatusMessage('O resultado final já foi enviado para a API.')
+      return
+    }
+
+    const finalMatch = findFinalMatch(knockoutStageList)
+
+    if (!finalMatch) {
+      setStatusVariant('error')
+      setStatusMessage(
+        'Não foi possível localizar a partida final para enviar o resultado.',
+      )
+      return
+    }
+
+    const finalResultPayload = buildFinalResultPayload(finalMatch)
+
+    setIsSendingFinalResult(true)
+    setStatusVariant('info')
+    setStatusMessage('Enviando resultado final...')
+
+    try {
+      await postFinalResult(finalResultPayload)
+
+      setHasSentFinalResult(true)
+      setStatusVariant('success')
+      setStatusMessage('O resultado final foi enviado com sucesso.')
+    } catch (error) {
+      console.error(error)
+      setStatusVariant('error')
+      setStatusMessage(
+        'Não foi possível enviar o resultado final. Tente novamente.',
+      )
+    } finally {
+      setIsSendingFinalResult(false)
+    }
+  }
+
   return {
     teamList,
     groupList,
     groupStageScheduleList,
     groupStandingsList,
+    knockoutStageList,
+    championTeam,
     isLoadingTeams,
+    isSendingFinalResult,
+    hasSentFinalResult,
     statusMessage,
     statusVariant,
     loadTeams,
     sortGroups,
     generateGroupStageMatches,
     simulateGroupStage,
+    generateKnockoutStage,
+    simulateKnockoutStage,
+    sendFinalResult,
   }
 }
 

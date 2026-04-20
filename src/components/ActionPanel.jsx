@@ -10,12 +10,39 @@ function getLoadTeamsButtonLabel(isLoadingTeams, hasLoadedTeams) {
   return 'Carregar seleções'
 }
 
+function getSendFinalResultButtonLabel(isSendingFinalResult, hasSentFinalResult) {
+  if (isSendingFinalResult) {
+    return 'Enviando resultado final...'
+  }
+
+  if (hasSentFinalResult) {
+    return 'Resultado final enviado'
+  }
+
+  return 'Enviar resultado final'
+}
+
 function getActionPanelDescription(
   loadedTeamCount,
   hasDrawnGroups,
   hasGeneratedGroupStageMatches,
   hasSimulatedGroupStage,
+  hasGeneratedKnockoutStage,
+  hasSimulatedKnockoutStage,
+  hasSentFinalResult,
 ) {
+  if (hasSentFinalResult) {
+    return 'O resultado final já foi enviado para a API.'
+  }
+
+  if (hasSimulatedKnockoutStage) {
+    return 'O mata-mata já foi simulado e o campeão já está definido.'
+  }
+
+  if (hasGeneratedKnockoutStage) {
+    return 'As fases finais já foram definidas. Agora você já pode simular o mata-mata.'
+  }
+
   if (hasSimulatedGroupStage) {
     return 'A fase de grupos já foi simulada e a classificação está pronta.'
   }
@@ -41,11 +68,18 @@ function ActionPanel(props) {
     onSortGroups,
     onGenerateGroupStageMatches,
     onSimulateGroupStage,
+    onGenerateKnockoutStage,
+    onSimulateKnockoutStage,
+    onSendFinalResult,
     isLoadingTeams,
+    isSendingFinalResult,
     hasLoadedTeams,
     hasDrawnGroups,
     hasGeneratedGroupStageMatches,
     hasSimulatedGroupStage,
+    hasGeneratedKnockoutStage,
+    hasSimulatedKnockoutStage,
+    hasSentFinalResult,
     loadedTeamCount,
   } = props
 
@@ -54,18 +88,30 @@ function ActionPanel(props) {
     hasLoadedTeams,
   )
 
+  const sendFinalResultButtonLabel = getSendFinalResultButtonLabel(
+    isSendingFinalResult,
+    hasSentFinalResult,
+  )
+
   const actionPanelDescription = getActionPanelDescription(
     loadedTeamCount,
     hasDrawnGroups,
     hasGeneratedGroupStageMatches,
     hasSimulatedGroupStage,
+    hasGeneratedKnockoutStage,
+    hasSimulatedKnockoutStage,
+    hasSentFinalResult,
   )
 
   return (
     <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-lg shadow-slate-950/20">
       <div className="mb-4">
-        <h2 className="text-xl font-semibold text-slate-100">Painel de ações</h2>
-        <p className="mt-1 text-sm text-slate-400">{actionPanelDescription}</p>
+        <h2 className="text-xl font-semibold text-slate-100">
+          Painel de ações
+        </h2>
+        <p className="mt-1 text-sm text-slate-400">
+          {actionPanelDescription}
+        </p>
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -107,18 +153,29 @@ function ActionPanel(props) {
 
         <button
           type="button"
-          disabled
-          className="rounded-xl bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition disabled:cursor-not-allowed disabled:opacity-60"
+          onClick={onGenerateKnockoutStage}
+          disabled={!hasSimulatedGroupStage || hasGeneratedKnockoutStage}
+          className="rounded-xl bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           Gerar mata-mata
         </button>
 
         <button
           type="button"
-          disabled
-          className="rounded-xl bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition disabled:cursor-not-allowed disabled:opacity-60"
+          onClick={onSimulateKnockoutStage}
+          disabled={!hasGeneratedKnockoutStage || hasSimulatedKnockoutStage}
+          className="rounded-xl bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Enviar resultado final
+          Simular fases finais
+        </button>
+
+        <button
+          type="button"
+          onClick={onSendFinalResult}
+          disabled={!hasSimulatedKnockoutStage || hasSentFinalResult || isSendingFinalResult}
+          className="rounded-xl bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {sendFinalResultButtonLabel}
         </button>
       </div>
     </section>

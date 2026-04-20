@@ -1,4 +1,5 @@
 const teamsEndpointUrl = '/api/WorldCup/GetAllTeams'
+const finalResultEndpointUrl = '/api/WorldCup/FinalResult'
 
 const gitUserHeaderName = 'git-user'
 const gitUserHeaderValue = 'dio1rodrigues'
@@ -12,9 +13,26 @@ function buildTeamsRequestOptions() {
   }
 }
 
+function buildFinalResultRequestOptions(finalResultPayload) {
+  return {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      [gitUserHeaderName]: gitUserHeaderValue,
+    },
+    body: JSON.stringify(finalResultPayload),
+  }
+}
+
 function validateTeamsResponse(response) {
   if (!response.ok) {
-    throw new Error(`Falha ao buscar seleções. Status: ${response.status}`)
+    throw new Error('A API de seleções retornou uma resposta inválida.')
+  }
+}
+
+function validateFinalResultResponse(response) {
+  if (!response.ok) {
+    throw new Error('A API de resultado final retornou uma resposta inválida.')
   }
 }
 
@@ -24,7 +42,9 @@ function validateTeamItem(teamItem) {
   }
 
   if (typeof teamItem.token !== 'string' || typeof teamItem.nome !== 'string') {
-    throw new Error('Uma ou mais seleções retornadas pela API estão em formato inválido.')
+    throw new Error(
+      'Uma ou mais seleções retornadas pela API estão em formato inválido.',
+    )
   }
 }
 
@@ -40,6 +60,20 @@ function validateTeamsData(teamsData) {
   return teamsData
 }
 
+async function readResponseData(response) {
+  const responseText = await response.text()
+
+  if (!responseText) {
+    return null
+  }
+
+  try {
+    return JSON.parse(responseText)
+  } catch {
+    return responseText
+  }
+}
+
 async function fetchAllTeams() {
   const requestOptions = buildTeamsRequestOptions()
   const response = await fetch(teamsEndpointUrl, requestOptions)
@@ -51,4 +85,13 @@ async function fetchAllTeams() {
   return validateTeamsData(teamsData)
 }
 
-export { fetchAllTeams }
+async function sendFinalResult(finalResultPayload) {
+  const requestOptions = buildFinalResultRequestOptions(finalResultPayload)
+  const response = await fetch(finalResultEndpointUrl, requestOptions)
+
+  validateFinalResultResponse(response)
+
+  return readResponseData(response)
+}
+
+export { fetchAllTeams, sendFinalResult }

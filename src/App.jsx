@@ -51,19 +51,28 @@ function App() {
     groupList,
     groupStageScheduleList,
     groupStandingsList,
+    knockoutStageList,
+    championTeam,
     isLoadingTeams,
+    isSendingFinalResult,
+    hasSentFinalResult,
     statusMessage,
     statusVariant,
     loadTeams,
     sortGroups,
     generateGroupStageMatches,
     simulateGroupStage,
+    generateKnockoutStage,
+    simulateKnockoutStage,
+    sendFinalResult,
   } = useTournament()
 
   const hasLoadedTeams = teamList.length > 0
   const hasDrawnGroups = groupList.length > 0
   const hasGeneratedGroupStageMatches = groupStageScheduleList.length > 0
   const hasSimulatedGroupStage = groupStandingsList.length > 0
+  const hasGeneratedKnockoutStage = knockoutStageList.length > 0
+  const hasSimulatedKnockoutStage = championTeam !== null
   const loadedTeamCount = teamList.length
   const renderGroupCard = createGroupCardRenderer(groupList)
 
@@ -75,7 +84,8 @@ function App() {
             Simulador de Copa do Mundo
           </h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400 sm:text-base">
-            Acompanhe grupos, partidas, classificação, mata-mata e campeão em uma única interface.
+            Acompanhe grupos, partidas, classificação, mata-mata e campeão em
+            uma única interface.
           </p>
         </section>
 
@@ -84,11 +94,18 @@ function App() {
           onSortGroups={sortGroups}
           onGenerateGroupStageMatches={generateGroupStageMatches}
           onSimulateGroupStage={simulateGroupStage}
+          onGenerateKnockoutStage={generateKnockoutStage}
+          onSimulateKnockoutStage={simulateKnockoutStage}
+          onSendFinalResult={sendFinalResult}
           isLoadingTeams={isLoadingTeams}
+          isSendingFinalResult={isSendingFinalResult}
           hasLoadedTeams={hasLoadedTeams}
           hasDrawnGroups={hasDrawnGroups}
           hasGeneratedGroupStageMatches={hasGeneratedGroupStageMatches}
           hasSimulatedGroupStage={hasSimulatedGroupStage}
+          hasGeneratedKnockoutStage={hasGeneratedKnockoutStage}
+          hasSimulatedKnockoutStage={hasSimulatedKnockoutStage}
+          hasSentFinalResult={hasSentFinalResult}
           loadedTeamCount={loadedTeamCount}
         />
 
@@ -103,9 +120,8 @@ function App() {
 
         <MatchList groupStageScheduleList={groupStageScheduleList} />
         <GroupTable groupStandingsList={groupStandingsList} />
-
-        <KnockoutBracket />
-        <ChampionCard />
+        <KnockoutBracket knockoutStageList={knockoutStageList} />
+        <ChampionCard championTeam={championTeam} />
       </main>
     </div>
   )

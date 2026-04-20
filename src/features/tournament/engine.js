@@ -16,7 +16,11 @@ function copyTeamList(teamList) {
 function shuffleTeamList(teamList) {
   const shuffledTeamList = copyTeamList(teamList)
 
-  for (let currentIndex = shuffledTeamList.length - 1; currentIndex > 0; currentIndex -= 1) {
+  for (
+    let currentIndex = shuffledTeamList.length - 1;
+    currentIndex > 0;
+    currentIndex -= 1
+  ) {
     const randomIndex = Math.floor(Math.random() * (currentIndex + 1))
     const currentTeam = shuffledTeamList[currentIndex]
 
@@ -60,7 +64,9 @@ function drawGroups(teamList) {
 
 function validateGroupTeamList(groupItem) {
   if (groupItem.teamList.length !== 4) {
-    throw new Error(`O ${groupItem.groupName} não possui 4 seleções para gerar as partidas.`)
+    throw new Error(
+      `O ${groupItem.groupName} não possui 4 seleções para gerar as partidas.`,
+    )
   }
 }
 
@@ -128,10 +134,16 @@ function generateGroupStageScheduleList(groupList) {
 }
 
 const goalCountPool = [0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 5]
+const penaltyGoalCountPool = [3, 4, 4, 4, 5, 5, 5, 6]
 
 function generateRandomGoalCount() {
   const randomIndex = Math.floor(Math.random() * goalCountPool.length)
   return goalCountPool[randomIndex]
+}
+
+function generateRandomPenaltyGoalCount() {
+  const randomIndex = Math.floor(Math.random() * penaltyGoalCountPool.length)
+  return penaltyGoalCountPool[randomIndex]
 }
 
 function simulateGroupStageMatch(matchItem) {
@@ -223,7 +235,11 @@ function updateStandingRowGoalDifference(standingRow) {
   standingRow.goalDifference = standingRow.goalsFor - standingRow.goalsAgainst
 }
 
-function applyMatchResultToStandingRows(homeStandingRow, awayStandingRow, matchItem) {
+function applyMatchResultToStandingRows(
+  homeStandingRow,
+  awayStandingRow,
+  matchItem,
+) {
   homeStandingRow.playedMatchCount += 1
   awayStandingRow.playedMatchCount += 1
 
@@ -255,12 +271,17 @@ function applyMatchResultToStandingRows(homeStandingRow, awayStandingRow, matchI
 function sortStandingRowList(standingRowList) {
   const sortedStandingRowList = [...standingRowList]
 
-  sortedStandingRowList.sort(function compareStandingRows(firstStandingRow, secondStandingRow) {
+  sortedStandingRowList.sort(function compareStandingRows(
+    firstStandingRow,
+    secondStandingRow,
+  ) {
     if (secondStandingRow.points !== firstStandingRow.points) {
       return secondStandingRow.points - firstStandingRow.points
     }
 
-    if (secondStandingRow.goalDifference !== firstStandingRow.goalDifference) {
+    if (
+      secondStandingRow.goalDifference !== firstStandingRow.goalDifference
+    ) {
       return secondStandingRow.goalDifference - firstStandingRow.goalDifference
     }
 
@@ -273,7 +294,11 @@ function sortStandingRowList(standingRowList) {
 function markQualifiedTeams(sortedStandingRowList) {
   const qualifiedStandingRowList = []
 
-  for (let standingRowIndex = 0; standingRowIndex < sortedStandingRowList.length; standingRowIndex += 1) {
+  for (
+    let standingRowIndex = 0;
+    standingRowIndex < sortedStandingRowList.length;
+    standingRowIndex += 1
+  ) {
     const currentStandingRow = sortedStandingRowList[standingRowIndex]
 
     qualifiedStandingRowList.push({
@@ -320,7 +345,11 @@ function calculateGroupStandings(groupStageScheduleItem) {
       matchItem.awayTeam.token,
     )
 
-    applyMatchResultToStandingRows(homeStandingRow, awayStandingRow, matchItem)
+    applyMatchResultToStandingRows(
+      homeStandingRow,
+      awayStandingRow,
+      matchItem,
+    )
   }
 
   const sortedStandingRowList = sortStandingRowList(standingRowList)
@@ -343,9 +372,285 @@ function calculateGroupStandingsList(groupStageScheduleList) {
   return groupStandingsList
 }
 
+function findGroupStandingsByName(groupStandingsList, groupName) {
+  for (const groupStandingsItem of groupStandingsList) {
+    if (groupStandingsItem.groupName === groupName) {
+      return groupStandingsItem
+    }
+  }
+
+  return null
+}
+
+function findQualifiedTeamByPosition(groupStandingsItem, position) {
+  return groupStandingsItem.standingsList[position]
+}
+
+function createKnockoutMatch(stageName, matchLabel, homeTeam, awayTeam) {
+  return {
+    stageName,
+    matchLabel,
+    homeTeam: {
+      token: homeTeam.teamToken,
+      nome: homeTeam.teamName,
+    },
+    awayTeam: {
+      token: awayTeam.teamToken,
+      nome: awayTeam.teamName,
+    },
+    homeGoals: null,
+    awayGoals: null,
+    homePenaltyGoals: null,
+    awayPenaltyGoals: null,
+    winnerTeam: null,
+  }
+}
+
+function createRoundOf16Match(
+  groupStandingsList,
+  homeGroupName,
+  homePosition,
+  awayGroupName,
+  awayPosition,
+  matchNumber,
+) {
+  const homeGroupStandings = findGroupStandingsByName(
+    groupStandingsList,
+    homeGroupName,
+  )
+
+  const awayGroupStandings = findGroupStandingsByName(
+    groupStandingsList,
+    awayGroupName,
+  )
+
+  if (!homeGroupStandings || !awayGroupStandings) {
+    throw new Error(
+      'Não foi possível localizar os grupos para montar as oitavas.',
+    )
+  }
+
+  const homeTeam = findQualifiedTeamByPosition(
+    homeGroupStandings,
+    homePosition,
+  )
+
+  const awayTeam = findQualifiedTeamByPosition(
+    awayGroupStandings,
+    awayPosition,
+  )
+
+  if (!homeTeam || !awayTeam) {
+    throw new Error(
+      'Não foi possível localizar os classificados para montar as oitavas.',
+    )
+  }
+
+  return createKnockoutMatch(
+    'Oitavas',
+    `Oitavas ${matchNumber}`,
+    homeTeam,
+    awayTeam,
+  )
+}
+
+function generateRoundOf16MatchList(groupStandingsList) {
+  return [
+    createRoundOf16Match(groupStandingsList, 'Grupo A', 0, 'Grupo B', 1, 1),
+    createRoundOf16Match(groupStandingsList, 'Grupo C', 0, 'Grupo D', 1, 2),
+    createRoundOf16Match(groupStandingsList, 'Grupo E', 0, 'Grupo F', 1, 3),
+    createRoundOf16Match(groupStandingsList, 'Grupo G', 0, 'Grupo H', 1, 4),
+    createRoundOf16Match(groupStandingsList, 'Grupo B', 0, 'Grupo A', 1, 5),
+    createRoundOf16Match(groupStandingsList, 'Grupo D', 0, 'Grupo C', 1, 6),
+    createRoundOf16Match(groupStandingsList, 'Grupo F', 0, 'Grupo E', 1, 7),
+    createRoundOf16Match(groupStandingsList, 'Grupo H', 0, 'Grupo G', 1, 8),
+  ]
+}
+
+function generateKnockoutStageList(groupStandingsList) {
+  const roundOf16MatchList = generateRoundOf16MatchList(groupStandingsList)
+
+  return [
+    {
+      stageName: 'Oitavas',
+      matchList: roundOf16MatchList,
+    },
+    {
+      stageName: 'Quartas',
+      matchList: [],
+    },
+    {
+      stageName: 'Semifinal',
+      matchList: [],
+    },
+    {
+      stageName: 'Final',
+      matchList: [],
+    },
+  ]
+}
+
+function createPenaltyResult() {
+  let homePenaltyGoals = generateRandomPenaltyGoalCount()
+  let awayPenaltyGoals = generateRandomPenaltyGoalCount()
+
+  while (homePenaltyGoals === awayPenaltyGoals) {
+    homePenaltyGoals = generateRandomPenaltyGoalCount()
+    awayPenaltyGoals = generateRandomPenaltyGoalCount()
+  }
+
+  return {
+    homePenaltyGoals,
+    awayPenaltyGoals,
+  }
+}
+
+function defineKnockoutWinner(matchItem) {
+  if (matchItem.homeGoals > matchItem.awayGoals) {
+    return {
+      ...matchItem,
+      winnerTeam: matchItem.homeTeam,
+    }
+  }
+
+  if (matchItem.homeGoals < matchItem.awayGoals) {
+    return {
+      ...matchItem,
+      winnerTeam: matchItem.awayTeam,
+    }
+  }
+
+  const penaltyResult = createPenaltyResult()
+
+  if (penaltyResult.homePenaltyGoals > penaltyResult.awayPenaltyGoals) {
+    return {
+      ...matchItem,
+      homePenaltyGoals: penaltyResult.homePenaltyGoals,
+      awayPenaltyGoals: penaltyResult.awayPenaltyGoals,
+      winnerTeam: matchItem.homeTeam,
+    }
+  }
+
+  return {
+    ...matchItem,
+    homePenaltyGoals: penaltyResult.homePenaltyGoals,
+    awayPenaltyGoals: penaltyResult.awayPenaltyGoals,
+    winnerTeam: matchItem.awayTeam,
+  }
+}
+
+function simulateKnockoutMatch(matchItem) {
+  const simulatedMatch = {
+    ...matchItem,
+    homeGoals: generateRandomGoalCount(),
+    awayGoals: generateRandomGoalCount(),
+  }
+
+  return defineKnockoutWinner(simulatedMatch)
+}
+
+function simulateKnockoutMatchList(matchList) {
+  const simulatedMatchList = []
+
+  for (const matchItem of matchList) {
+    const simulatedMatchItem = simulateKnockoutMatch(matchItem)
+    simulatedMatchList.push(simulatedMatchItem)
+  }
+
+  return simulatedMatchList
+}
+
+function createNextStageMatchList(previousStageMatchList, stageName) {
+  const nextStageMatchList = []
+
+  for (
+    let matchIndex = 0;
+    matchIndex < previousStageMatchList.length;
+    matchIndex += 2
+  ) {
+    const firstMatch = previousStageMatchList[matchIndex]
+    const secondMatch = previousStageMatchList[matchIndex + 1]
+
+    nextStageMatchList.push(
+      createKnockoutMatch(
+        stageName,
+        `${stageName} ${nextStageMatchList.length + 1}`,
+        {
+          teamToken: firstMatch.winnerTeam.token,
+          teamName: firstMatch.winnerTeam.nome,
+        },
+        {
+          teamToken: secondMatch.winnerTeam.token,
+          teamName: secondMatch.winnerTeam.nome,
+        },
+      ),
+    )
+  }
+
+  return nextStageMatchList
+}
+
+function simulateKnockoutStageList(knockoutStageList) {
+  const roundOf16MatchList = simulateKnockoutMatchList(
+    knockoutStageList[0].matchList,
+  )
+
+  const quarterFinalBaseMatchList = createNextStageMatchList(
+    roundOf16MatchList,
+    'Quartas',
+  )
+  const quarterFinalMatchList = simulateKnockoutMatchList(
+    quarterFinalBaseMatchList,
+  )
+
+  const semifinalBaseMatchList = createNextStageMatchList(
+    quarterFinalMatchList,
+    'Semifinal',
+  )
+  const semifinalMatchList = simulateKnockoutMatchList(semifinalBaseMatchList)
+
+  const finalBaseMatchList = createNextStageMatchList(
+    semifinalMatchList,
+    'Final',
+  )
+  const finalMatchList = simulateKnockoutMatchList(finalBaseMatchList)
+
+  return [
+    {
+      stageName: 'Oitavas',
+      matchList: roundOf16MatchList,
+    },
+    {
+      stageName: 'Quartas',
+      matchList: quarterFinalMatchList,
+    },
+    {
+      stageName: 'Semifinal',
+      matchList: semifinalMatchList,
+    },
+    {
+      stageName: 'Final',
+      matchList: finalMatchList,
+    },
+  ]
+}
+
+function findChampionTeam(knockoutStageList) {
+  const finalStage = knockoutStageList[3]
+
+  if (!finalStage || finalStage.matchList.length === 0) {
+    return null
+  }
+
+  return finalStage.matchList[0].winnerTeam
+}
+
 export {
   drawGroups,
   generateGroupStageScheduleList,
   simulateGroupStageScheduleList,
   calculateGroupStandingsList,
+  generateKnockoutStageList,
+  simulateKnockoutStageList,
+  findChampionTeam,
 }
