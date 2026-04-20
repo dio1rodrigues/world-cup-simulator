@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { fetchAllTeams, sendFinalResult as postFinalResult } from './api.js'
+import { buildFinalResultPayload, findFinalMatch } from './finalResult.js'
 import {
   drawGroups,
   generateGroupStageScheduleList,
@@ -10,35 +11,12 @@ import {
   findChampionTeam,
 } from './engine.js'
 
-function findFinalStage(knockoutStageList) {
-  for (const stageItem of knockoutStageList) {
-    if (stageItem.stageName === 'Final') {
-      return stageItem
-    }
+function getErrorMessage(error, fallbackMessage) {
+  if (error instanceof Error && error.message) {
+    return error.message
   }
 
-  return null
-}
-
-function findFinalMatch(knockoutStageList) {
-  const finalStage = findFinalStage(knockoutStageList)
-
-  if (!finalStage || finalStage.matchList.length === 0) {
-    return null
-  }
-
-  return finalStage.matchList[0]
-}
-
-function buildFinalResultPayload(finalMatch) {
-  return {
-    equipeA: finalMatch.homeTeam.token,
-    equipeB: finalMatch.awayTeam.token,
-    golsEquipeA: finalMatch.homeGoals,
-    golsEquipeB: finalMatch.awayGoals,
-    golsPenaltyTimeA: finalMatch.homePenaltyGoals ?? 0,
-    golsPenaltyTimeB: finalMatch.awayPenaltyGoals ?? 0,
-  }
+  return fallbackMessage
 }
 
 function useTournament() {
@@ -82,7 +60,12 @@ function useTournament() {
     } catch (error) {
       console.error(error)
       setStatusVariant('error')
-      setStatusMessage('Não foi possível carregar as seleções. Tente novamente.')
+      setStatusMessage(
+        getErrorMessage(
+          error,
+          'Não foi possível carregar as seleções. Tente novamente.',
+        ),
+      )
     } finally {
       setIsLoadingTeams(false)
     }
@@ -246,7 +229,10 @@ function useTournament() {
       console.error(error)
       setStatusVariant('error')
       setStatusMessage(
-        'Não foi possível enviar o resultado final. Tente novamente.',
+        getErrorMessage(
+          error,
+          'Não foi possível enviar o resultado final. Tente novamente.',
+        ),
       )
     } finally {
       setIsSendingFinalResult(false)

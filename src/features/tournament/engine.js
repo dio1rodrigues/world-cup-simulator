@@ -9,6 +9,23 @@ const groupNameList = [
   'Grupo H',
 ]
 
+const requiredTeamCount = 32
+
+const goalCountPool = [0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 5]
+const penaltyGoalCountPool = [3, 4, 4, 4, 5, 5, 5, 6]
+
+function validateTournamentTeamList(teamList) {
+  if (!Array.isArray(teamList)) {
+    throw new Error('A lista de seleções do torneio é inválida.')
+  }
+
+  if (teamList.length !== requiredTeamCount) {
+    throw new Error(
+      `O torneio precisa de ${requiredTeamCount} seleções para o sorteio.`,
+    )
+  }
+}
+
 function copyTeamList(teamList) {
   return [...teamList]
 }
@@ -58,7 +75,10 @@ function distributeTeamsIntoGroups(shuffledTeamList) {
 }
 
 function drawGroups(teamList) {
+  validateTournamentTeamList(teamList)
+
   const shuffledTeamList = shuffleTeamList(teamList)
+
   return distributeTeamsIntoGroups(shuffledTeamList)
 }
 
@@ -133,9 +153,6 @@ function generateGroupStageScheduleList(groupList) {
   return groupStageScheduleList
 }
 
-const goalCountPool = [0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 5]
-const penaltyGoalCountPool = [3, 4, 4, 4, 5, 5, 5, 6]
-
 function generateRandomGoalCount() {
   const randomIndex = Math.floor(Math.random() * goalCountPool.length)
   return goalCountPool[randomIndex]
@@ -195,7 +212,7 @@ function simulateGroupStageScheduleList(groupStageScheduleList) {
   return simulatedGroupStageScheduleList
 }
 
-function createStandingRow(teamItem) {
+function createStandingRow(teamItem, drawTieBreakerValue) {
   return {
     teamToken: teamItem.token,
     teamName: teamItem.nome,
@@ -207,15 +224,18 @@ function createStandingRow(teamItem) {
     goalsAgainst: 0,
     goalDifference: 0,
     points: 0,
+    drawTieBreakerValue,
     isQualified: false,
   }
 }
 
-function createStandingRowList(teamList) {
+function createStandingRowList(teamList, randomNumberGenerator = Math.random) {
   const standingRowList = []
 
   for (const teamItem of teamList) {
-    standingRowList.push(createStandingRow(teamItem))
+    standingRowList.push(
+      createStandingRow(teamItem, randomNumberGenerator()),
+    )
   }
 
   return standingRowList
@@ -285,7 +305,10 @@ function sortStandingRowList(standingRowList) {
       return secondStandingRow.goalDifference - firstStandingRow.goalDifference
     }
 
-    return Math.random() < 0.5 ? -1 : 1
+    return (
+      secondStandingRow.drawTieBreakerValue -
+      firstStandingRow.drawTieBreakerValue
+    )
   })
 
   return sortedStandingRowList
@@ -322,7 +345,10 @@ function flattenGroupStageMatchList(groupStageScheduleItem) {
   return flattenedMatchList
 }
 
-function calculateGroupStandings(groupStageScheduleItem) {
+function calculateGroupStandings(
+  groupStageScheduleItem,
+  randomNumberGenerator = Math.random,
+) {
   const firstRound = groupStageScheduleItem.roundList[0]
   const teamList = [
     firstRound.matchList[0].homeTeam,
@@ -331,7 +357,10 @@ function calculateGroupStandings(groupStageScheduleItem) {
     firstRound.matchList[1].awayTeam,
   ]
 
-  const standingRowList = createStandingRowList(teamList)
+  const standingRowList = createStandingRowList(
+    teamList,
+    randomNumberGenerator,
+  )
   const matchList = flattenGroupStageMatchList(groupStageScheduleItem)
 
   for (const matchItem of matchList) {
@@ -361,11 +390,17 @@ function calculateGroupStandings(groupStageScheduleItem) {
   }
 }
 
-function calculateGroupStandingsList(groupStageScheduleList) {
+function calculateGroupStandingsList(
+  groupStageScheduleList,
+  randomNumberGenerator = Math.random,
+) {
   const groupStandingsList = []
 
   for (const groupStageScheduleItem of groupStageScheduleList) {
-    const groupStandings = calculateGroupStandings(groupStageScheduleItem)
+    const groupStandings = calculateGroupStandings(
+      groupStageScheduleItem,
+      randomNumberGenerator,
+    )
     groupStandingsList.push(groupStandings)
   }
 
@@ -653,4 +688,6 @@ export {
   generateKnockoutStageList,
   simulateKnockoutStageList,
   findChampionTeam,
+  sortStandingRowList,
+  simulateKnockoutMatch,
 }
